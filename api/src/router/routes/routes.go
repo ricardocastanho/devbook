@@ -14,10 +14,10 @@ type route struct {
 }
 
 func BuildRoutes(r *mux.Router) *mux.Router {
-    rotas := usersRoutes
+    routes := usersRoutes
 
-    for _, rota := range rotas {
-        r.HandleFunc(rota.URI, rota.HandlerFunc).Methods(rota.Method)
+    for _, route := range routes {
+        r.HandleFunc(route.URI, route.HandlerFunc).Methods(route.Method)
     }
 
     return r
