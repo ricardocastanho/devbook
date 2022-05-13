@@ -5,13 +5,15 @@ import (
 	"log"
 	"net/http"
 
+	"api/src/config"
 	"api/src/router"
 )
 
 func main() {
-    fmt.Println("Listening on port :3000 🚀")
+	config.LoadEnv()
 
-    r := router.BuildRouter()
+	r := router.BuildRouter()
 
-    log.Fatal(http.ListenAndServe(":3000", r))
+	fmt.Printf("Listening on port :%s 🚀", config.APIPort)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", config.APIPort), r))
 }
