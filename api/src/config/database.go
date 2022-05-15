@@ -9,9 +9,11 @@ import (
 
 func ConnectDatabase() (*sql.DB, error) {
 	datasourceNameString := fmt.Sprintf(
-		"%s:%s@/%s?charset=utf8&parseTime=True&loc=Local",
+		"%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
 		DBUser,
 		DBPassword,
+		DBHost,
+		DBPort,
 		DBName,
 	)
 
