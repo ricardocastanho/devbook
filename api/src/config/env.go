@@ -11,6 +11,8 @@ var (
 	DBName     = "devbook"
 	DBUser     = "devbook"
 	DBPassword = "devbook"
+	DBHost     = "127.0.0.1"
+	DBPort     = "3300"
 	APIPort    = "4000"
 )
 
