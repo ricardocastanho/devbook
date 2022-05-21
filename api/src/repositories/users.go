@@ -26,10 +26,10 @@ func (repo *UserRepository) CreateUser(user *models.User) (string, error) {
 
 	defer stmt.Close()
 
-	uuid := uuid.New()
+	user.ID = uuid.New().String()
 
 	_, err = stmt.Exec(
-		uuid.String(),
+		user.ID,
 		user.FirstName,
 		user.LastName,
 		user.Username,
@@ -40,5 +40,5 @@ func (repo *UserRepository) CreateUser(user *models.User) (string, error) {
 		return "", err
 	}
 
-	return uuid.String(), nil
+	return user.ID, nil
 }
