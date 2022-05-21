@@ -3,11 +3,10 @@ package controller
 import (
 	"api/src/config"
 	"api/src/models"
+	"api/src/presenters"
 	"api/src/repositories"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 )
 
@@ -23,7 +22,8 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
-		log.Fatal(err)
+		presenters.Error(w, http.StatusUnprocessableEntity, err)
+		return
 	}
 
 	var user models.User
@@ -31,24 +31,30 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &user)
 
 	if err != nil {
-		log.Fatal(err)
+		presenters.Error(w, http.StatusBadRequest, err)
+		return
 	}
 
 	db, err := config.ConnectDatabase()
 
 	if err != nil {
-		log.Fatal(err)
+		presenters.Error(w, http.StatusInternalServerError, err)
+		return
 	}
+
+	defer db.Close()
 
 	repo := repositories.NewUserRepo(db)
 
 	id, err := repo.CreateUser(&user)
 
 	if err != nil {
-		log.Fatal(err)
+		presenters.Error(w, http.StatusInternalServerError, err)
+		return
 	}
 
-	w.Write([]byte(fmt.Sprintf("User Created with ID: %s", id)))
+	user.ID = id
+	presenters.JSON(w, http.StatusCreated, user)
 }
 
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
