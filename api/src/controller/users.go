@@ -35,6 +35,13 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = user.Validate()
+
+	if err != nil {
+		presenters.Error(w, http.StatusBadRequest, err)
+		return
+	}
+
 	db, err := config.ConnectDatabase()
 
 	if err != nil {
