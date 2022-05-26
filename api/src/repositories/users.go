@@ -3,6 +3,7 @@ package repositories
 import (
 	"api/src/models"
 	"database/sql"
+	"fmt"
 
 	"github.com/google/uuid"
 )
@@ -41,4 +42,42 @@ func (repo *UserRepository) CreateUser(user *models.User) (string, error) {
 	}
 
 	return user.ID, nil
+}
+
+func (repo *UserRepository) GetUsers(username string) ([]models.User, error) {
+	username = fmt.Sprintf("%%%s%%", username)
+
+	rows, err := repo.db.Query(
+		"SELECT id, first_name, last_name, username, created_at, updated_at FROM users WHERE username LIKE ?",
+		username,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var users []models.User
+
+	for rows.Next() {
+		var user models.User
+
+		err := rows.Scan(
+			&user.ID,
+			&user.FirstName,
+			&user.LastName,
+			&user.Username,
+			&user.CreatedAt,
+			&user.UpdatedAt,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		users = append(users, user)
+	}
+
+	return users, nil
 }
