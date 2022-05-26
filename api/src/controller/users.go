@@ -8,10 +8,33 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 func GetUsers(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Get Users"))
+	w.Header().Set("Content-Type", "application/json")
+
+	username := strings.ToLower(r.URL.Query().Get("username"))
+
+	db, err := config.ConnectDatabase()
+
+	if err != nil {
+		presenters.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	defer db.Close()
+
+	repo := repositories.NewUserRepo(db)
+
+	users, err := repo.GetUsers(username)
+
+	if err != nil {
+		presenters.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	presenters.JSON(w, http.StatusOK, users)
 }
 
 func FindUser(w http.ResponseWriter, r *http.Request) {
