@@ -81,3 +81,35 @@ func (repo *UserRepository) GetUsers(username string) ([]models.User, error) {
 
 	return users, nil
 }
+
+func (repo *UserRepository) FindUser(id string) (models.User, error) {
+	rows, err := repo.db.Query(
+		"SELECT id, first_name, last_name, username, created_at, updated_at FROM users WHERE id = ?",
+		id,
+	)
+
+	if err != nil {
+		return models.User{}, err
+	}
+
+	defer rows.Close()
+
+	var user models.User
+
+	for rows.Next() {
+		err := rows.Scan(
+			&user.ID,
+			&user.FirstName,
+			&user.LastName,
+			&user.Username,
+			&user.CreatedAt,
+			&user.UpdatedAt,
+		)
+
+		if err != nil {
+			return models.User{}, err
+		}
+	}
+
+	return user, nil
+}
