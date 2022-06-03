@@ -9,6 +9,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/gorilla/mux"
 )
 
 func GetUsers(w http.ResponseWriter, r *http.Request) {
@@ -38,7 +40,31 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func FindUser(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Find User"))
+	w.Header().Set("Content-Type", "application/json")
+
+	params := mux.Vars(r)
+
+	userID := params["id"]
+
+	db, err := config.ConnectDatabase()
+
+	if err != nil {
+		presenters.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	defer db.Close()
+
+	repo := repositories.NewUserRepo(db)
+
+	user, err := repo.FindUser(userID)
+
+	if err != nil {
+		presenters.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	presenters.JSON(w, http.StatusOK, user)
 }
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
