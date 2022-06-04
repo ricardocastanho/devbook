@@ -17,8 +17,8 @@ type User struct {
 	DeletedAt time.Time `json:"deletedAt,omitempty"`
 }
 
-func (u *User) Validate() error {
-	err := u.checkEmptyFields()
+func (u *User) Validate(action string) error {
+	err := u.checkEmptyFields(action)
 
 	if err != nil {
 		return err
@@ -28,7 +28,7 @@ func (u *User) Validate() error {
 	return nil
 }
 
-func (u *User) checkEmptyFields() error {
+func (u *User) checkEmptyFields(action string) error {
 	if u.FirstName == "" {
 		return errors.New("first name is required")
 	}
@@ -41,7 +41,7 @@ func (u *User) checkEmptyFields() error {
 		return errors.New("username is required")
 	}
 
-	if u.Password == "" {
+	if action == "add" && u.Password == "" {
 		return errors.New("password is required")
 	}
 
