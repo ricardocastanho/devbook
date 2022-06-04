@@ -113,3 +113,28 @@ func (repo *UserRepository) FindUser(id string) (models.User, error) {
 
 	return user, nil
 }
+
+func (repo *UserRepository) UpdateUser(userID string, user *models.User) error {
+	stmt, err := repo.db.Prepare(
+		"UPDATE users SET first_name = ?, last_name = ?, username = ? WHERE id = ?",
+	)
+
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(
+		user.FirstName,
+		user.LastName,
+		user.Username,
+		userID,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
