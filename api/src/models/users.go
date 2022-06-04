@@ -1,6 +1,7 @@
 package models
 
 import (
+	"api/src/support"
 	"errors"
 	"strings"
 	"time"
@@ -25,6 +26,13 @@ func (u *User) Validate(action string) error {
 	}
 
 	u.trimFields()
+
+	err = u.hashPassword()
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -52,4 +60,15 @@ func (u *User) trimFields() {
 	u.FirstName = strings.TrimSpace(u.FirstName)
 	u.LastName = strings.TrimSpace(u.LastName)
 	u.Username = strings.TrimSpace(u.Username)
+}
+
+func (u *User) hashPassword() error {
+	hashedPassword, err := support.Hash(u.Password)
+
+	if err != nil {
+		return err
+	}
+
+	u.Password = string(hashedPassword)
+	return nil
 }
