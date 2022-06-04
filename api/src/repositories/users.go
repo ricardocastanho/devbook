@@ -48,7 +48,7 @@ func (repo *UserRepository) GetUsers(username string) ([]models.User, error) {
 	username = fmt.Sprintf("%%%s%%", username)
 
 	rows, err := repo.db.Query(
-		"SELECT id, first_name, last_name, username, created_at, updated_at FROM users WHERE username LIKE ?",
+		"SELECT id, first_name, last_name, username, created_at, updated_at FROM users WHERE username LIKE ? AND deleted_at IS NULL",
 		username,
 	)
 
@@ -130,6 +130,28 @@ func (repo *UserRepository) UpdateUser(userID string, user *models.User) error {
 		user.LastName,
 		user.Username,
 		userID,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repo *UserRepository) DeleteUser(userId string) error {
+	stmt, err := repo.db.Prepare(
+		"UPDATE users SET deleted_at = now() WHERE id = ?",
+	)
+
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(
+		userId,
 	)
 
 	if err != nil {
