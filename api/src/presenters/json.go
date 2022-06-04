@@ -9,9 +9,11 @@ import (
 func JSON(w http.ResponseWriter, statusCode int, data interface{}) {
 	w.WriteHeader(statusCode)
 
-	err := json.NewEncoder(w).Encode(data)
+	if data != nil {
+		err := json.NewEncoder(w).Encode(data)
 
-	if err != nil {
-		log.Fatal(err)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
