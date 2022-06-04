@@ -114,6 +114,35 @@ func (repo *UserRepository) FindUser(id string) (models.User, error) {
 	return user, nil
 }
 
+func (repo *UserRepository) FindUserByUsername(username string) (models.User, error) {
+	rows, err := repo.db.Query(
+		"SELECT id, username, password FROM users WHERE username = ?",
+		username,
+	)
+
+	if err != nil {
+		return models.User{}, err
+	}
+
+	defer rows.Close()
+
+	var user models.User
+
+	for rows.Next() {
+		err := rows.Scan(
+			&user.ID,
+			&user.Username,
+			&user.Password,
+		)
+
+		if err != nil {
+			return models.User{}, err
+		}
+	}
+
+	return user, nil
+}
+
 func (repo *UserRepository) UpdateUser(userID string, user *models.User) error {
 	stmt, err := repo.db.Prepare(
 		"UPDATE users SET first_name = ?, last_name = ?, username = ? WHERE id = ?",
