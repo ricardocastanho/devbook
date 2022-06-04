@@ -7,18 +7,21 @@ import (
 )
 
 type route struct {
-    URI string
-    Method string
-    HandlerFunc func(w http.ResponseWriter, r *http.Request)
-    NeedAuth bool
+	URI         string
+	Method      string
+	HandlerFunc func(w http.ResponseWriter, r *http.Request)
+	NeedAuth    bool
 }
 
 func BuildRoutes(r *mux.Router) *mux.Router {
-    routes := usersRoutes
+	var routes []route
 
-    for _, route := range routes {
-        r.HandleFunc(route.URI, route.HandlerFunc).Methods(route.Method)
-    }
+	routes = append(routes, authRoutes...)
+	routes = append(routes, usersRoutes...)
 
-    return r
+	for _, route := range routes {
+		r.HandleFunc(route.URI, route.HandlerFunc).Methods(route.Method)
+	}
+
+	return r
 }
