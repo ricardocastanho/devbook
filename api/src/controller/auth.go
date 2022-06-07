@@ -49,9 +49,16 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	err = support.CompareHashAndPassword(userDB.Password, user.Password)
 
 	if err != nil {
+
+		return
+	}
+
+	token, err := support.GenerateToken(userDB.ID)
+
+	if err != nil {
 		presenters.Error(w, http.StatusUnauthorized, err)
 		return
 	}
 
-	w.Write([]byte("Login success"))
+	w.Write([]byte(token))
 }
