@@ -2,6 +2,10 @@ package support
 
 import (
 	"api/src/config"
+	"errors"
+	"fmt"
+	"net/http"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -25,4 +29,46 @@ func GenerateToken(userID string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	return token.SignedString([]byte(config.APIJWTSignature))
+}
+
+func ValidateToken(r *http.Request) error {
+	rawToken := getToken(r)
+
+	if rawToken == "" {
+		return errors.New("token not provided")
+	}
+
+	token, err := jwt.Parse(rawToken, getSignature)
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(token)
+	return nil
+}
+
+func getToken(r *http.Request) string {
+	header := r.Header.Get("Authorization")
+
+	token := strings.Split(header, " ")
+
+	if len(token) == 2 {
+		return token[1]
+	}
+
+	return ""
+}
+
+func getSignature(token *jwt.Token) (interface{}, error) {
+	_, ok := token.Method.(*jwt.SigningMethodHMAC)
+
+	if !ok {
+		return nil, fmt.Errorf(
+			"assign method uninspected: %v",
+			token.Header["alg"],
+		)
+	}
+
+	return config.APIJWTSignature, nil
 }
