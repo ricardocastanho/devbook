@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	jwt "github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -28,7 +28,7 @@ func GenerateToken(userID string) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	return token.SignedString([]byte(config.APIJWTSignature))
+	return token.SignedString([]byte(config.SecretKey))
 }
 
 func ValidateToken(r *http.Request) error {
@@ -44,8 +44,13 @@ func ValidateToken(r *http.Request) error {
 		return err
 	}
 
-	fmt.Println(token)
-	return nil
+	_, ok := token.Claims.(jwt.MapClaims)
+
+	if ok && token.Valid {
+		return nil
+	}
+
+	return errors.New("invalid token")
 }
 
 func getToken(r *http.Request) string {
@@ -65,10 +70,10 @@ func getSignature(token *jwt.Token) (interface{}, error) {
 
 	if !ok {
 		return nil, fmt.Errorf(
-			"assign method uninspected: %v",
+			"assign method unexpected: %v",
 			token.Header["alg"],
 		)
 	}
 
-	return config.APIJWTSignature, nil
+	return config.SecretKey, nil
 }

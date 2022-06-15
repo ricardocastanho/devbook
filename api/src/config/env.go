@@ -8,13 +8,13 @@ import (
 )
 
 var (
-	DBName          = "devbook"
-	DBUser          = "devbook"
-	DBPassword      = "devbook"
-	DBHost          = "127.0.0.1"
-	DBPort          = "3300"
-	APIPort         = "4000"
-	APIJWTSignature = "secret"
+	DBName     = "devbook"
+	DBUser     = "devbook"
+	DBPassword = "devbook"
+	DBHost     = "127.0.0.1"
+	DBPort     = "3300"
+	APIPort    = "4000"
+	SecretKey  = "secret"
 )
 
 func LoadEnv() {
@@ -28,5 +28,5 @@ func LoadEnv() {
 	DBUser = os.Getenv("DB_USER")
 	DBPassword = os.Getenv("DB_PASSWORD")
 	APIPort = os.Getenv("API_PORT")
-	APIJWTSignature = os.Getenv("API_JWT_TOKEN=secret")
+	SecretKey = os.Getenv("SECRET_KEY")
 }
