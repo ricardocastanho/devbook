@@ -14,7 +14,7 @@ var (
 	DBHost     = "127.0.0.1"
 	DBPort     = "3300"
 	APIPort    = "4000"
-	SecretKey  = "secret"
+	SecretKey  = []byte("secret")
 )
 
 func LoadEnv() {
@@ -28,5 +28,5 @@ func LoadEnv() {
 	DBUser = os.Getenv("DB_USER")
 	DBPassword = os.Getenv("DB_PASSWORD")
 	APIPort = os.Getenv("API_PORT")
-	SecretKey = os.Getenv("SECRET_KEY")
+	SecretKey = []byte(os.Getenv("SECRET_KEY"))
 }
