@@ -53,6 +53,30 @@ func ValidateToken(r *http.Request) error {
 	return errors.New("invalid token")
 }
 
+func GetUserLoggedFromToken(r *http.Request) (string, error) {
+	rawToken := getToken(r)
+
+	if rawToken == "" {
+		return "", errors.New("token not provided")
+	}
+
+	token, err := jwt.Parse(rawToken, getSignature)
+
+	if err != nil {
+		return "", err
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+
+	if ok && token.Valid {
+		userId := fmt.Sprintf("%s", claims["user_id"])
+
+		return userId, nil
+	}
+
+	return "", errors.New("invalid token")
+}
+
 func getToken(r *http.Request) string {
 	header := r.Header.Get("Authorization")
 
