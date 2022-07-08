@@ -5,7 +5,9 @@ import (
 	"api/src/models"
 	"api/src/presenters"
 	"api/src/repositories"
+	"api/src/support"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -122,6 +124,18 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		presenters.Error(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	userIDFromToken, err := support.GetUserLoggedFromToken(r)
+
+	if err != nil {
+		presenters.Error(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	if userID != userIDFromToken {
+		presenters.Error(w, http.StatusForbidden, errors.New("you can only update your own user"))
 		return
 	}
 
