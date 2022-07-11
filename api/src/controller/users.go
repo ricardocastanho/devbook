@@ -181,6 +181,18 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 	userID := params["id"]
 
+	userIDFromToken, err := support.GetUserLoggedFromToken(r)
+
+	if err != nil {
+		presenters.Error(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	if userID != userIDFromToken {
+		presenters.Error(w, http.StatusForbidden, errors.New("you can only delete your own user"))
+		return
+	}
+
 	db, err := config.ConnectDatabase()
 
 	if err != nil {

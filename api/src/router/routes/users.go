@@ -23,7 +23,7 @@ var usersRoutes = []route{
 		URI:         "/users",
 		Method:      http.MethodPost,
 		HandlerFunc: controller.CreateUser,
-		NeedAuth:    true,
+		NeedAuth:    false,
 	},
 	{
 		URI:         "/users/{id}",

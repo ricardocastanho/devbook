@@ -26,7 +26,6 @@ func BuildRoutes(r *mux.Router) *mux.Router {
 		} else {
 			r.HandleFunc(route.URI, route.HandlerFunc).Methods(route.Method)
 		}
-		// r.HandleFunc(route.URI, route.HandlerFunc).Methods(route.Method)
 	}
 
 	return r
