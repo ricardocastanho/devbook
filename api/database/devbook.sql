@@ -13,6 +13,7 @@ END;;
 DELIMITER ;
 
 DROP TABLE IF EXISTS `users`;
+DROP TABLE IF EXISTS `followers`;
 
 CREATE TABLE IF NOT EXISTS `users` (
   `id` VARCHAR(255) NOT NULL PRIMARY KEY,
@@ -23,4 +24,21 @@ CREATE TABLE IF NOT EXISTS `users` (
   `created_at` TIMESTAMP DEFAULT current_timestamp(),
   `updated_at` TIMESTAMP DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `deleted_at` TIMESTAMP NULL DEFAULT NULL
+);
+
+CREATE TABLE `followers`(
+  `user_id` VARCHAR(255) NOT NULL,
+  `follower_id` VARCHAR(255) NOT NULL,
+  `created_at` TIMESTAMP DEFAULT current_timestamp(),
+  `updated_at` TIMESTAMP DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+
+  FOREIGN KEY (`user_id`)
+  REFERENCES `users`(`id`)
+  ON DELETE CASCADE,
+
+  FOREIGN KEY (`follower_id`)
+  REFERENCES `users`(`id`)
+  ON DELETE CASCADE,
+
+  PRIMARY KEY(`user_id`, `follower_id`)
 );
