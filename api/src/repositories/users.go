@@ -189,3 +189,23 @@ func (repo *UserRepository) DeleteUser(userId string) error {
 
 	return nil
 }
+
+func (repo *UserRepository) FollowUser(userId string, followerId string) error {
+	stmt, err := repo.db.Prepare(
+		"INSERT IGNORE INTO followers (user_id, follower_id) VALUES (?, ?)",
+	)
+
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(userId, followerId)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
