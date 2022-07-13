@@ -209,3 +209,23 @@ func (repo *UserRepository) FollowUser(userId string, followerId string) error {
 
 	return nil
 }
+
+func (repo *UserRepository) UnfollowUser(userId string, followerId string) error {
+	stmt, err := repo.db.Prepare(
+		"DELETE FROM followers WHERE user_id = ? AND follower_id = ?",
+	)
+
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(userId, followerId)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

@@ -250,3 +250,35 @@ func FollowUser(w http.ResponseWriter, r *http.Request) {
 
 	presenters.JSON(w, http.StatusNoContent, nil)
 }
+
+func UnfollowUser(w http.ResponseWriter, r *http.Request) {
+	userLoggedID, err := support.GetUserLoggedFromToken(r)
+
+	if err != nil {
+		presenters.Error(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	params := mux.Vars(r)
+	followerID := params["id"]
+
+	db, err := config.ConnectDatabase()
+
+	if err != nil {
+		presenters.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	defer db.Close()
+
+	repo := repositories.NewUserRepo(db)
+
+	err = repo.UnfollowUser(userLoggedID, followerID)
+
+	if err != nil {
+		presenters.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	presenters.JSON(w, http.StatusNoContent, nil)
+}
