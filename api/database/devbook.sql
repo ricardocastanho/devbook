@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `deleted_at` TIMESTAMP NULL DEFAULT NULL
 );
 
-CREATE TABLE `followers`(
+CREATE TABLE IF NOT EXISTS `followers`(
   `user_id` VARCHAR(255) NOT NULL,
   `follower_id` VARCHAR(255) NOT NULL,
   `created_at` TIMESTAMP DEFAULT current_timestamp(),
