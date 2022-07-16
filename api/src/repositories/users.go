@@ -229,3 +229,46 @@ func (repo *UserRepository) UnfollowUser(userId string, followerId string) error
 
 	return nil
 }
+
+func (repo *UserRepository) GetFollowers(userID string) ([]models.User, error) {
+	rows, err := repo.db.Query(`
+		SELECT 
+			u.id, u.first_name, u.last_name, u.username, u.created_at, u.updated_at
+		FROM
+			users u
+		INNER JOIN
+			followers f ON f.follower_id = u.id
+		WHERE
+			f.user_id = ?
+			AND u.deleted_at IS NULL;
+	`, userID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var followers []models.User
+
+	for rows.Next() {
+		var follower models.User
+
+		err := rows.Scan(
+			&follower.ID,
+			&follower.FirstName,
+			&follower.LastName,
+			&follower.Username,
+			&follower.CreatedAt,
+			&follower.UpdatedAt,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		followers = append(followers, follower)
+	}
+
+	return followers, nil
+}
