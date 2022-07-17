@@ -7,6 +7,7 @@ import (
 	"api/src/repositories"
 	"api/src/support"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 )
@@ -49,7 +50,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	err = support.CompareHashAndPassword(userDB.Password, user.Password)
 
 	if err != nil {
-
+		presenters.Error(w, http.StatusUnauthorized, errors.New("invalid username or password"))
 		return
 	}
 
