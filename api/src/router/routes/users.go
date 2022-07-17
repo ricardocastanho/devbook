@@ -61,4 +61,10 @@ var usersRoutes = []route{
 		HandlerFunc: controller.GetFollowing,
 		NeedAuth:    true,
 	},
+	{
+		URI:         "/users/{id}/change-password",
+		Method:      http.MethodPost,
+		HandlerFunc: controller.ChangePassword,
+		NeedAuth:    true,
+	},
 }

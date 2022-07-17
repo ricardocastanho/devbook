@@ -315,3 +315,50 @@ func (repo *UserRepository) GetFollowing(userID string) ([]models.User, error) {
 
 	return following, nil
 }
+
+func (repo *UserRepository) GetPassword(userID string) (string, error) {
+	rows, err := repo.db.Query(
+		"SELECT password FROM users WHERE id = ? AND deleted_at IS NULL",
+		userID,
+	)
+
+	if err != nil {
+		return "", err
+	}
+
+	defer rows.Close()
+
+	var password string
+
+	for rows.Next() {
+		err := rows.Scan(
+			&password,
+		)
+
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return password, nil
+}
+
+func (repo *UserRepository) ChangePassword(userID, password string) error {
+	stmt, err := repo.db.Prepare(
+		"UPDATE users SET password = ? WHERE id = ?",
+	)
+
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(password, userID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

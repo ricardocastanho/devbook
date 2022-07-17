@@ -332,3 +332,77 @@ func GetFollowing(w http.ResponseWriter, r *http.Request) {
 
 	presenters.JSON(w, http.StatusOK, following)
 }
+
+func ChangePassword(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	userID := params["id"]
+
+	userLoggedID, err := support.GetUserLoggedFromToken(r)
+
+	if err != nil {
+		presenters.Error(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	if userID != userLoggedID {
+		presenters.Error(w, http.StatusForbidden, errors.New("you can only change your own password"))
+		return
+	}
+
+	body, err := ioutil.ReadAll(r.Body)
+
+	if err != nil {
+		presenters.Error(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	var changePassword models.ChangePassword
+
+	err = json.Unmarshal(body, &changePassword)
+
+	if err != nil {
+		presenters.Error(w, http.StatusBadRequest, err)
+		return
+	}
+
+	db, err := config.ConnectDatabase()
+
+	if err != nil {
+		presenters.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	defer db.Close()
+
+	repo := repositories.NewUserRepo(db)
+
+	actualPassword, err := repo.GetPassword(userID)
+
+	if err != nil {
+		presenters.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	err = support.CompareHashAndPassword(actualPassword, changePassword.Old)
+
+	if err != nil {
+		presenters.Error(w, http.StatusUnauthorized, errors.New("the passwords don't match"))
+		return
+	}
+
+	hashedPassword, err := support.Hash(changePassword.New)
+
+	if err != nil {
+		presenters.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	err = repo.ChangePassword(userID, string(hashedPassword))
+
+	if err != nil {
+		presenters.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	presenters.JSON(w, http.StatusNoContent, nil)
+}
