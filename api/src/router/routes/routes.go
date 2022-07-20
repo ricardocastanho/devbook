@@ -22,9 +22,15 @@ func BuildRoutes(r *mux.Router) *mux.Router {
 
 	for _, route := range routes {
 		if route.NeedAuth {
-			r.HandleFunc(route.URI, middleware.Auth(route.HandlerFunc)).Methods(route.Method)
+			r.HandleFunc(
+				route.URI,
+				middleware.Logger(middleware.Auth(route.HandlerFunc)),
+			).Methods(route.Method)
 		} else {
-			r.HandleFunc(route.URI, route.HandlerFunc).Methods(route.Method)
+			r.HandleFunc(
+				route.URI,
+				middleware.Logger(route.HandlerFunc),
+			).Methods(route.Method)
 		}
 	}
 
