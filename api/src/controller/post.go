@@ -9,7 +9,35 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
+
+func FindPost(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+
+	postID := params["id"]
+
+	db, err := config.ConnectDatabase()
+
+	if err != nil {
+		presenters.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	defer db.Close()
+
+	repo := repositories.NewPostRepo(db)
+
+	post, err := repo.FindPost(postID)
+
+	if err != nil {
+		presenters.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	presenters.JSON(w, http.StatusOK, post)
+}
 
 func CreatePosts(w http.ResponseWriter, r *http.Request) {
 	userID, err := support.GetUserLoggedFromToken(r)
