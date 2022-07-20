@@ -19,6 +19,7 @@ func BuildRoutes(r *mux.Router) *mux.Router {
 
 	routes = append(routes, authRoutes...)
 	routes = append(routes, usersRoutes...)
+	routes = append(routes, postsRoutes...)
 
 	for _, route := range routes {
 		if route.NeedAuth {
