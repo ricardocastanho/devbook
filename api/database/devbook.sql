@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS `followers`(
 
 CREATE TABLE IF NOT EXISTS `posts` (
   `id` VARCHAR(255) NOT NULL PRIMARY KEY,
-  `user_id` VARCHAR(255) NOT NULL,
+  `author_id` VARCHAR(255) NOT NULL,
   `title` VARCHAR(255) NOT NULL,
   `content` VARCHAR(255) NOT NULL,
   `likes` INT UNSIGNED NOT NULL DEFAULT 0,
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS `posts` (
   `updated_at` TIMESTAMP DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `deleted_at` TIMESTAMP NULL DEFAULT NULL,
 
-  FOREIGN KEY (`user_id`)
+  FOREIGN KEY (`author_id`)
   REFERENCES `users`(`id`)
   ON DELETE CASCADE
 );
