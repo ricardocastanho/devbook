@@ -15,6 +15,51 @@ func NewPostRepo(db *sql.DB) PostRepository {
 	return PostRepository{db}
 }
 
+func (repo *PostRepository) GetPosts(userID string) ([]models.Post, error) {
+	rows, err := repo.db.Query(`
+		SELECT
+			p.id, p.title, p.content, p.likes, p.created_at, p.updated_at,
+			u.id, u.first_name, u.last_name, u.username
+		FROM posts p
+		INNER JOIN users u ON p.author_id = u.id
+		WHERE p.author_id = ?
+		ORDER BY p.created_at DESC
+	`, userID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var posts []models.Post
+
+	for rows.Next() {
+		var post models.Post
+
+		err := rows.Scan(
+			&post.ID,
+			&post.Title,
+			&post.Content,
+			&post.Likes,
+			&post.CreatedAt,
+			&post.UpdatedAt,
+			&post.Author.ID,
+			&post.Author.FirstName,
+			&post.Author.LastName,
+			&post.Author.Username,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		posts = append(posts, post)
+	}
+
+	return posts, nil
+}
+
 func (repo *PostRepository) FindPost(postID string) (models.Post, error) {
 	rows, err := repo.db.Query(`
 		SELECT

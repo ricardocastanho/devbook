@@ -7,6 +7,12 @@ import (
 
 var postsRoutes = []route{
 	{
+		URI:         "/posts",
+		Method:      http.MethodGet,
+		HandlerFunc: controller.GetPosts,
+		NeedAuth:    true,
+	},
+	{
 		URI:         "/posts/{id}",
 		Method:      http.MethodGet,
 		HandlerFunc: controller.FindPost,

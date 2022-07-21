@@ -13,6 +13,35 @@ import (
 	"github.com/gorilla/mux"
 )
 
+func GetPosts(w http.ResponseWriter, r *http.Request) {
+	userID, err := support.GetUserLoggedFromToken(r)
+
+	if err != nil {
+		presenters.Error(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	db, err := config.ConnectDatabase()
+
+	if err != nil {
+		presenters.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	defer db.Close()
+
+	repo := repositories.NewPostRepo(db)
+
+	posts, err := repo.GetPosts(userID)
+
+	if err != nil {
+		presenters.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	presenters.JSON(w, http.StatusOK, posts)
+}
+
 func FindPost(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
