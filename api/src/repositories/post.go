@@ -17,14 +17,17 @@ func NewPostRepo(db *sql.DB) PostRepository {
 
 func (repo *PostRepository) GetPosts(userID string) ([]models.Post, error) {
 	rows, err := repo.db.Query(`
-		SELECT
+		SELECT DISTINCT
 			p.id, p.title, p.content, p.likes, p.created_at, p.updated_at,
 			u.id, u.first_name, u.last_name, u.username
 		FROM posts p
-		INNER JOIN users u ON p.author_id = u.id
-		WHERE p.author_id = ?
+		INNER JOIN users u ON u.id = p.author_id
+		LEFT JOIN followers f ON f.user_id = p.author_id
+		WHERE p.author_id = ? OR f.user_id = p.author_id
 		ORDER BY p.created_at DESC
-	`, userID)
+		`,
+		userID,
+	)
 
 	if err != nil {
 		return nil, err
