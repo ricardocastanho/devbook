@@ -155,6 +155,11 @@ func UpdatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if post.ID != postID {
+		presenters.Error(w, http.StatusForbidden, errors.New("post not found"))
+		return
+	}
+
 	if post.Author.ID != userID {
 		presenters.Error(w, http.StatusForbidden, errors.New("you are not the author of this post"))
 		return
@@ -189,4 +194,54 @@ func UpdatePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	presenters.JSON(w, http.StatusOK, post)
+}
+
+func DeletePost(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+
+	postID := params["id"]
+
+	userID, err := support.GetUserLoggedFromToken(r)
+
+	if err != nil {
+		presenters.Error(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	db, err := config.ConnectDatabase()
+
+	if err != nil {
+		presenters.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	defer db.Close()
+
+	repo := repositories.NewPostRepo(db)
+
+	post, err := repo.FindPost(postID)
+
+	if err != nil {
+		presenters.Error(w, http.StatusBadRequest, err)
+		return
+	}
+
+	if post.ID != postID {
+		presenters.Error(w, http.StatusNotFound, errors.New("post not found"))
+		return
+	}
+
+	if post.Author.ID != userID {
+		presenters.Error(w, http.StatusForbidden, errors.New("you are not the author of this post"))
+		return
+	}
+
+	err = repo.DeletePost(postID)
+
+	if err != nil {
+		presenters.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	presenters.JSON(w, http.StatusNoContent, nil)
 }

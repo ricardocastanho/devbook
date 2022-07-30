@@ -23,7 +23,7 @@ func (repo *PostRepository) GetPosts(userID string) ([]models.Post, error) {
 		FROM posts p
 		INNER JOIN users u ON u.id = p.author_id
 		LEFT JOIN followers f ON f.user_id = p.author_id
-		WHERE p.author_id = ? OR f.user_id = p.author_id
+		WHERE (p.author_id = ? OR f.user_id = p.author_id) AND p.deleted_at IS NULL
 		ORDER BY p.created_at DESC
 		`,
 		userID,
@@ -70,7 +70,7 @@ func (repo *PostRepository) FindPost(postID string) (models.Post, error) {
 			u.id, u.first_name, u.last_name, u.username
 		FROM posts p
 		INNER JOIN users u ON p.author_id = u.id
-		WHERE p.id = ?
+		WHERE p.id = ? AND p.deleted_at IS NULL
 		LIMIT 1
 	`, postID)
 
@@ -138,6 +138,26 @@ func (repo *PostRepository) UpdatePost(post models.Post) error {
 	defer stmt.Close()
 
 	_, err = stmt.Exec(post.Title, post.Content, post.ID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repo *PostRepository) DeletePost(postID string) error {
+	stmt, err := repo.db.Prepare(
+		"UPDATE posts SET deleted_at = now() WHERE id = ?",
+	)
+
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(postID)
 
 	if err != nil {
 		return err
