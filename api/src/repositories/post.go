@@ -230,3 +230,25 @@ func (repo *PostRepository) LikePost(postID string) error {
 
 	return nil
 }
+
+func (repo *PostRepository) UnlikePost(postID string) error {
+	stmt, err := repo.db.Prepare(`
+		UPDATE posts SET likes =
+			CASE WHEN likes > 0 THEN likes - 1 ELSE 0 END 
+		WHERE id = ? AND deleted_at IS NULL
+	`)
+
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(postID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
