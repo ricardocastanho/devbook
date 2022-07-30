@@ -210,3 +210,23 @@ func (repo *PostRepository) GetPostsByUser(userID string) ([]models.Post, error)
 
 	return posts, nil
 }
+
+func (repo *PostRepository) LikePost(postID string) error {
+	stmt, err := repo.db.Prepare(`
+		UPDATE posts SET likes = likes + 1 WHERE id = ?
+	`)
+
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(postID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
