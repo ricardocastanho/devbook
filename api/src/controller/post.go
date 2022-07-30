@@ -7,6 +7,7 @@ import (
 	"api/src/repositories"
 	"api/src/support"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 
@@ -122,4 +123,70 @@ func CreatePosts(w http.ResponseWriter, r *http.Request) {
 	post.ID = postID
 
 	presenters.JSON(w, http.StatusCreated, post)
+}
+
+func UpdatePost(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+
+	postID := params["id"]
+
+	userID, err := support.GetUserLoggedFromToken(r)
+
+	if err != nil {
+		presenters.Error(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	db, err := config.ConnectDatabase()
+
+	if err != nil {
+		presenters.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	defer db.Close()
+
+	repo := repositories.NewPostRepo(db)
+
+	post, err := repo.FindPost(postID)
+
+	if err != nil {
+		presenters.Error(w, http.StatusBadRequest, err)
+		return
+	}
+
+	if post.Author.ID != userID {
+		presenters.Error(w, http.StatusForbidden, errors.New("you are not the author of this post"))
+		return
+	}
+
+	body, err := ioutil.ReadAll(r.Body)
+
+	if err != nil {
+		presenters.Error(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	err = json.Unmarshal(body, &post)
+
+	if err != nil {
+		presenters.Error(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	err = post.Validate()
+
+	if err != nil {
+		presenters.Error(w, http.StatusBadRequest, err)
+		return
+	}
+
+	err = repo.UpdatePost(post)
+
+	if err != nil {
+		presenters.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	presenters.JSON(w, http.StatusOK, post)
 }

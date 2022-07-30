@@ -24,4 +24,10 @@ var postsRoutes = []route{
 		HandlerFunc: controller.CreatePosts,
 		NeedAuth:    true,
 	},
+	{
+		URI:         "/posts/{id}",
+		Method:      http.MethodPut,
+		HandlerFunc: controller.UpdatePost,
+		NeedAuth:    true,
+	},
 }

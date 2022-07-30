@@ -125,3 +125,23 @@ func (repo *PostRepository) CreatePost(post models.Post) (string, error) {
 
 	return post.ID, nil
 }
+
+func (repo *PostRepository) UpdatePost(post models.Post) error {
+	stmt, err := repo.db.Prepare(`
+		UPDATE posts SET title = ?, content = ? WHERE id = ?
+	`)
+
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(post.Title, post.Content, post.ID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
